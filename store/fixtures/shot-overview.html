@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>YouTube Shortcuts — 機能</title>
+    <link rel="stylesheet" href="../../options/options.css" />
+    <style>
+      html, body {
+        width: 1280px;
+        height: 800px;
+        overflow: hidden;
+        margin: 0;
+      }
+      .wrap {
+        height: 100%;
+        padding: 56px 72px;
+        display: grid;
+        grid-template-rows: auto 1fr;
+        gap: 36px;
+        box-sizing: border-box;
+      }
+      .top {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+        align-content: start;
+      }
+      .card {
+        padding: 22px 22px 20px;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: var(--card);
+      }
+      .card h2 {
+        margin: 0 0 14px;
+        font-size: 0.78rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--accent-2);
+        font-weight: 600;
+      }
+      .row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 0;
+        border-top: 1px solid var(--line);
+        font-size: 16px;
+        background: transparent;
+      }
+      .row:first-of-type { border-top: 0; padding-top: 0; }
+      .key {
+        min-width: 88px;
+        text-align: center;
+        padding: 7px 10px;
+        border-radius: 10px;
+        border: 1px dashed rgba(244, 235, 225, 0.28);
+        background: rgba(255,255,255,0.03);
+        font-size: 14px;
+      }
+      .note {
+        grid-column: 1 / -1;
+        margin: 4px 0 0;
+        color: var(--muted);
+        font-size: 15px;
+      }
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="top">
+        <img class="brand-mark" src="../../icons/icon128.png" width="72" height="72" alt="" />
+        <div>
+          <p class="brand" style="font-size: 42px; margin: 0;">YouTube Shortcuts</p>
+          <p class="lede" style="margin: 6px 0 0; font-size: 18px;">好きなキーで、YouTube を操作する。</p>
+        </div>
+      </header>
+      <div class="grid">
+        <section class="card">
+          <h2>再生・シーク</h2>
+          <div class="row"><span>再生 / 一時停止</span><span class="key">K</span></div>
+          <div class="row"><span>10秒戻る / 進む</span><span class="key">J / L</span></div>
+          <div class="row"><span>5秒戻る / 進む</span><span class="key">← / →</span></div>
+        </section>
+        <section class="card">
+          <h2>音声・表示</h2>
+          <div class="row"><span>音量</span><span class="key">↑ / ↓</span></div>
+          <div class="row"><span>ミュート</span><span class="key">M</span></div>
+          <div class="row"><span>フルスクリーン</span><span class="key">F</span></div>
+          <div class="row"><span>シアター / 字幕</span><span class="key">T / C</span></div>
+        </section>
+        <section class="card">
+          <h2>速度・ナビ</h2>
+          <div class="row"><span>速度ダウン / アップ</span><span class="key">Shift + , / .</span></div>
+          <div class="row"><span>次 / 前の動画</span><span class="key">Shift + N / P</span></div>
+          <div class="row"><span>すべて再割り当て可能</span><span class="key">自由</span></div>
+        </section>
+        <p class="note">デフォルトは YouTube 標準に近いキー構成。オプション画面からいつでも変更できます。</p>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>YouTube Shortcuts — 設定</title>
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="hero">
+        <div class="brand-row">
+          <img class="brand-mark" src="../icons/icon128.png" width="56" height="56" alt="" />
+          <div>
+            <p class="brand">YouTube Shortcuts</p>
+            <p class="brand-sub">設定</p>
+          </div>
+        </div>
+        <h1>好きなキーで、YouTube を操作する。</h1>
+        <p class="lede">
+          再生・シーク・音量・字幕などを、好みのショートカットに割り当てられます。
+        </p>
+        <div class="hero-actions">
+          <label class="toggle">
+            <input type="checkbox" id="enabled" checked />
+            <span>ショートカットを有効にする</span>
+          </label>
+          <button type="button" id="reset" class="btn ghost">初期設定に戻す</button>
+        </div>
+      </header>
+
+      <section class="panel" aria-labelledby="keys-title">
+        <div class="panel-head">
+          <h2 id="keys-title">キー割り当て</h2>
+          <p class="hint">枠をクリックしてからキーを押すと割り当てできます。Esc でキャンセル、Backspace で解除。</p>
+        </div>
+        <div id="actions" class="actions"></div>
+        <p id="status" class="status" role="status" aria-live="polite"></p>
+        <p class="sync-note">設定は Chrome の同期で他の PC にも反映されます。</p>
+      </section>
+
+      <section class="panel tips" aria-labelledby="tips-title">
+        <h2 id="tips-title">ヒント</h2>
+        <ul>
+          <li>設定は Chrome の同期で他の PC にも反映されます（同じ Google アカウントで Chrome にログインし、同期をオンにしてください）。</li>
+          <li>コメント欄や検索欄にフォーカスがあるときは無効です。Esc でフォーカスを外してから押してください。</li>
+          <li>同系統のショートカット拡張は同時に1つだけ有効にしてください（競合します）。</li>
+          <li>拡張を読み込み直したあとは、開いている YouTube タブを1回リロードしてください。</li>
+        </ul>
+      </section>
+
+      <footer class="foot">
+        <span>v<span id="ext-version">1.0.1</span></span>
+        <a href="https://www.youtube.com/" target="_blank" rel="noreferrer">YouTube を開く</a>
+      </footer>
+    </div>
+    <script src="shared.js"></script>
+    <script src="options.js"></script>
+  </body>
+</html>

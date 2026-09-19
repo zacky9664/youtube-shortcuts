@@ -1,0 +1,130 @@
+:root {
+  color-scheme: dark;
+  --bg: #171310;
+  --ink: #f4ebe1;
+  --muted: #b9a99a;
+  --accent: #e4572e;
+  --accent-2: #f0a202;
+  --line: rgba(244, 235, 225, 0.14);
+  --ok: #7dcfb6;
+  --font-display: Georgia, "Iowan Old Style", "Palatino Linotype", serif;
+  --font-body: "Avenir Next", "Segoe UI", "Hiragino Sans", "Noto Sans JP",
+    sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  width: 300px;
+  padding: 16px;
+  font: 13px/1.45 var(--font-body);
+  color: var(--ink);
+  background:
+    radial-gradient(180px 90px at 0% 0%, rgba(228, 87, 46, 0.28), transparent),
+    radial-gradient(140px 70px at 100% 0%, rgba(240, 162, 2, 0.14), transparent),
+    var(--bg);
+}
+
+.head {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 14px;
+  animation: rise 320ms ease both;
+}
+
+.mark {
+  border-radius: 10px;
+  flex: 0 0 auto;
+  box-shadow: 0 0 0 1px var(--line);
+}
+
+h1 {
+  margin: 0;
+  font-size: 15px;
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+}
+
+.head p {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.toggle {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 14px;
+  cursor: pointer;
+  user-select: none;
+  animation: rise 380ms ease both;
+}
+
+.toggle input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+}
+
+.actions {
+  display: grid;
+  gap: 8px;
+  animation: rise 440ms ease both;
+}
+
+.actions a,
+.actions button {
+  display: block;
+  width: 100%;
+  text-align: center;
+  text-decoration: none;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 9px 12px;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 140ms ease, background 140ms ease, transform 120ms ease;
+}
+
+.actions .primary {
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--accent), #c2411a);
+  color: #fff8f3;
+  font-weight: 600;
+}
+
+.actions a:hover,
+.actions button:hover {
+  border-color: rgba(244, 235, 225, 0.35);
+  transform: translateY(-1px);
+}
+
+.actions .primary:hover {
+  border-color: transparent;
+  filter: brightness(1.06);
+}
+
+.status {
+  min-height: 1.2em;
+  margin: 10px 0 0;
+  color: var(--ok);
+  font-size: 12px;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
