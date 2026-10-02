@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "YouTube Shortcuts",
   "short_name": "YT Shortcuts",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "YouTube 用のカスタムキーボードショートカット",
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAv2mh/DJoEhaJxDtwDWcX+W2NdX7eLVoku2vfJj62U8lStRySZXa8UMkBtjAe8c2WDa0Up6IJaukCizp0/GCBDtxcVncpqnRYxKPa3L/ameUtxjs8Oq+P0suwjxyCjHBb1c8Qpd9G2zh6NwOs4vyl05uDSse5+zdQXGr+3sWCpVsN/WMP2rDPZe8iZDy9xKMrJxkH5G1YcA0mmMvuko5mGg/cUf+tvV6HHK65NrwWZ52vUqsaX6zZNxWv/gHkyt2YMdgDifu9QnN87TCIx/5fuCWed59fE9U4hrRYnieTObKI8pkkonNine9bK1LucgUmTdNBM6L4syoyPseijPtAPwIDAQAB",
   "permissions": [
