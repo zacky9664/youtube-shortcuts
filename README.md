@@ -56,3 +56,4 @@ python3 scripts/make-store-assets.py
 - アップロード用 zip: `build/youtube-shortcuts-v*.zip`
 - 掲載文: `store/listing-ja.md`
 - スクリーンショット等: `store/assets/`
+- 更新履歴: `CHANGELOG.md`

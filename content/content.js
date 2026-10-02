@@ -75,7 +75,104 @@
     return Boolean(el);
   }
 
+  function isShortsPage() {
+    return location.pathname.startsWith("/shorts");
+  }
+
+  function playerFrom(el) {
+    if (!el) return null;
+    if (el.id === "movie_player" || el.classList?.contains("html5-video-player")) {
+      return el;
+    }
+    return (
+      el.querySelector?.("#movie_player") ||
+      el.querySelector?.(".html5-video-player") ||
+      null
+    );
+  }
+
+  /** Visible area of an element in the viewport (px²). */
+  function visibleArea(el) {
+    if (!(el instanceof Element)) return 0;
+    const rect = el.getBoundingClientRect();
+    const w = Math.max(
+      0,
+      Math.min(rect.right, window.innerWidth) - Math.max(rect.left, 0)
+    );
+    const h = Math.max(
+      0,
+      Math.min(rect.bottom, window.innerHeight) - Math.max(rect.top, 0)
+    );
+    return w * h;
+  }
+
+  /**
+   * Shorts keeps several players in the DOM while scrolling. Always prefer the
+   * active / most-visible / currently-playing one instead of the first match.
+   */
+  function getActiveShortsPlayer() {
+    const activeRenderer =
+      document.querySelector("ytd-reel-video-renderer[is-active]") ||
+      document.querySelector("ytd-reel-video-renderer[active]");
+    const fromActive = playerFrom(activeRenderer);
+    if (fromActive) return fromActive;
+
+    const shortsRoot =
+      document.querySelector("ytd-shorts") ||
+      document.querySelector("#shorts-container") ||
+      document;
+    const players = Array.from(
+      shortsRoot.querySelectorAll("#movie_player, .html5-video-player")
+    );
+    let bestPlayer = null;
+    let bestScore = -1;
+    for (const player of players) {
+      const video = player.querySelector("video");
+      if (!video) continue;
+      const area = visibleArea(video);
+      if (area <= 0) continue;
+      let score = area;
+      if (!video.paused && !video.ended) score += 1e9;
+      if (score > bestScore) {
+        bestScore = score;
+        bestPlayer = player;
+      }
+    }
+    if (bestPlayer) return bestPlayer;
+
+    // Last resort: best video anywhere on the page
+    const videos = Array.from(document.querySelectorAll("video"));
+    let bestVideo = null;
+    bestScore = -1;
+    for (const video of videos) {
+      const area = visibleArea(video);
+      if (area <= 0) continue;
+      let score = area;
+      if (!video.paused && !video.ended) score += 1e9;
+      if (score > bestScore) {
+        bestScore = score;
+        bestVideo = video;
+      }
+    }
+    if (!bestVideo) return null;
+    return (
+      bestVideo.closest("#movie_player") ||
+      bestVideo.closest(".html5-video-player") ||
+      bestVideo.parentElement
+    );
+  }
+
   function getMoviePlayer() {
+    if (isShortsPage()) {
+      const shortsPlayer = getActiveShortsPlayer();
+      if (shortsPlayer) {
+        moviePlayer = shortsPlayer;
+        return moviePlayer;
+      }
+      moviePlayer = null;
+      return null;
+    }
+
     if (moviePlayer && document.contains(moviePlayer)) return moviePlayer;
     moviePlayer =
       document.getElementById("movie_player") ||
@@ -84,9 +181,17 @@
   }
 
   function getVideo() {
+    if (isShortsPage()) {
+      const activeVideo =
+        document.querySelector("ytd-reel-video-renderer[is-active] video") ||
+        document.querySelector("ytd-reel-video-renderer[active] video");
+      if (activeVideo) return activeVideo;
+    }
     const player = getMoviePlayer();
     if (!player) return null;
-    return player.querySelector("video");
+    const nested = player.querySelector("video");
+    if (nested) return nested;
+    return player instanceof HTMLVideoElement ? player : null;
   }
 
   function ensurePlayerApi() {
@@ -216,20 +321,72 @@
     return true;
   }
 
+  function clickFullscreenButton(root) {
+    const scope = root instanceof Element ? root : document;
+    const selectors = [
+      ".ytp-fullscreen-button",
+      'button.ytp-fullscreen-button',
+      'button[aria-label*="全画面"]',
+      'button[aria-label*="フルスクリーン"]',
+      'button[aria-label*="Fullscreen"]',
+      'button[title*="Fullscreen"]',
+      'button[title*="全画面"]',
+    ];
+    for (const sel of selectors) {
+      const btn = scope.querySelector(sel);
+      if (btn) {
+        btn.click();
+        return true;
+      }
+    }
+    // Shorts / global fallback
+    if (scope !== document) {
+      for (const sel of selectors) {
+        const btn = document.querySelector(sel);
+        if (btn) {
+          btn.click();
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   function toggleFullscreen() {
     const player = ensurePlayerApi();
-    if (player && typeof player.toggleFullscreen === "function") {
-      player.toggleFullscreen();
+
+    // Prefer YouTube's own control. requestFullscreen() on <video> / a small
+    // wrapper leaves the player stuck in the top-left with black bars.
+    if (clickFullscreenButton(player)) {
+      showToast("フルスクリーン");
       return true;
     }
-    const video = getVideo();
-    if (!video) return false;
-    if (document.fullscreenElement) {
-      document.exitFullscreen();
-    } else {
-      (video.parentElement || video).requestFullscreen?.();
+
+    if (player && typeof player.toggleFullscreen === "function") {
+      player.toggleFullscreen();
+      showToast("フルスクリーン");
+      return true;
     }
-    return true;
+
+    if (document.fullscreenElement) {
+      document.exitFullscreen?.();
+      showToast("フルスクリーン解除");
+      return true;
+    }
+
+    // Last resort: fullscreen the player chrome, never the raw <video>
+    const target =
+      (player instanceof Element && player) ||
+      document.getElementById("movie_player") ||
+      document.querySelector(".html5-video-player");
+    if (target?.requestFullscreen) {
+      target.requestFullscreen();
+      showToast("フルスクリーン");
+      return true;
+    }
+
+    showToast("フルスクリーンにできませんでした");
+    return false;
   }
 
   function toggleTheater() {
@@ -348,24 +505,57 @@
   }
 
   function nextVideo() {
-    const ok = clickNav([
-      ".ytp-next-button",
-      'a.ytp-next-button',
-      'a[aria-label*="次"]',
-      'a[aria-label*="Next"]',
-      'button[aria-label*="次"]',
-      'button[aria-label*="Next"]',
-    ]);
-    if (ok) showToast("次の動画");
-    else showToast("次の動画ボタンが見つかりません");
+    const ok = clickNav(
+      isShortsPage()
+        ? [
+            "#navigation-button-down button",
+            "ytd-shorts #navigation-button-down button",
+            'button[aria-label*="次の動画"]',
+            'button[aria-label*="Next video"]',
+            'button[aria-label*="次"]',
+            'button[aria-label*="Next"]',
+          ]
+        : [
+            ".ytp-next-button",
+            "a.ytp-next-button",
+            'a[aria-label*="次"]',
+            'a[aria-label*="Next"]',
+            'button[aria-label*="次"]',
+            'button[aria-label*="Next"]',
+          ]
+    );
+    if (ok) {
+      refreshPlayerRef();
+      showToast("次の動画");
+    } else {
+      showToast("次の動画ボタンが見つかりません");
+    }
     return ok;
   }
 
   function prevVideo() {
+    if (isShortsPage()) {
+      const ok = clickNav([
+        "#navigation-button-up button",
+        "ytd-shorts #navigation-button-up button",
+        'button[aria-label*="前の動画"]',
+        'button[aria-label*="Previous video"]',
+        'button[aria-label*="前"]',
+        'button[aria-label*="Previous"]',
+      ]);
+      if (ok) {
+        refreshPlayerRef();
+        showToast("前の動画");
+        return true;
+      }
+      showToast("前の動画ボタンが見つかりません");
+      return false;
+    }
+
     // YouTube rarely exposes prev; try history back on watch page as fallback
     const ok = clickNav([
       ".ytp-prev-button",
-      'a.ytp-prev-button',
+      "a.ytp-prev-button",
       'a[aria-label*="前"]',
       'a[aria-label*="Previous"]',
       'button[aria-label*="前"]',
@@ -419,6 +609,9 @@
     if (event.isComposing) return;
     if (isEditableTarget(event.target)) return;
 
+    // Shorts recycles players in-DOM; never trust a cached node across scrolls.
+    if (isShortsPage()) moviePlayer = null;
+
     // Only act on watch / shorts / embedded player pages with a video
     const path = location.pathname;
     const isWatchLike =
@@ -458,8 +651,9 @@
   }
 
   function installNavigationHooks() {
-    // YouTube fires these on SPA route changes
+    // YouTube fires these on SPA route changes (including Shorts)
     document.addEventListener("yt-navigate-finish", onNavigated, true);
+    document.addEventListener("yt-navigate-start", onNavigated, true);
     document.addEventListener("yt-page-data-updated", onNavigated, true);
     window.addEventListener("yt-navigate-finish", onNavigated, true);
 
@@ -476,10 +670,14 @@
     wrap("replaceState");
     window.addEventListener("popstate", onNavigated, true);
 
-    // URL observer for any missed navigation
+    // URL / active-short observer for missed SPA transitions
     setInterval(() => {
-      if (location.href !== lastUrl) onNavigated();
-    }, 800);
+      if (location.href !== lastUrl) {
+        onNavigated();
+        return;
+      }
+      if (isShortsPage()) refreshPlayerRef();
+    }, 500);
   }
 
   function bindKeys() {
@@ -525,10 +723,30 @@
     installNavigationHooks();
     refreshPlayerRef();
 
-    // Re-acquire player when DOM swaps the player node
-    const obs = new MutationObserver(() => {
-      if (!moviePlayer || !document.contains(moviePlayer)) {
+    // Re-acquire player when DOM swaps, or when Shorts changes the active reel
+    let refreshQueued = false;
+    const queueRefresh = () => {
+      if (refreshQueued) return;
+      refreshQueued = true;
+      requestAnimationFrame(() => {
+        refreshQueued = false;
         refreshPlayerRef();
+      });
+    };
+    const obs = new MutationObserver((mutations) => {
+      if (isShortsPage()) {
+        for (const m of mutations) {
+          if (
+            m.type === "attributes" &&
+            (m.attributeName === "is-active" || m.attributeName === "active")
+          ) {
+            queueRefresh();
+            return;
+          }
+        }
+      }
+      if (!moviePlayer || !document.contains(moviePlayer)) {
+        queueRefresh();
       }
     });
     const startObs = () => {
@@ -536,6 +754,8 @@
         obs.observe(document.documentElement, {
           childList: true,
           subtree: true,
+          attributes: true,
+          attributeFilter: ["is-active", "active"],
         });
       }
     };
